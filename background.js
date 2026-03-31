@@ -58,9 +58,9 @@ chrome.runtime.onMessage.addListener((msg, sender, reply) => {
     return true;
   }
 
-  // Content script says chat switched — clear clips for that tab
+  // Content script or popup says reset — clear clips for that tab
   if (msg.action === "resetChat") {
-    const tabId = sender.tab?.id;
+    const tabId = msg.tabId ?? sender.tab?.id;
     if (tabId !== undefined) {
       store[tabId] = new Map();
       chrome.action.setBadgeText({ text: "", tabId });

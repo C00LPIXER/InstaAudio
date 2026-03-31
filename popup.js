@@ -14,6 +14,7 @@
   const statusEl = document.getElementById("status");
   const footerEl = document.getElementById("footer");
   const dlAllBtn = document.getElementById("dlAll");
+  const refreshBtn = document.getElementById("refreshBtn");
 
   let currentAudio = null;  // HTMLAudioElement currently playing
   let currentBtn   = null;  // the ▶ button that is active
@@ -271,6 +272,53 @@
         dlAllBtn.textContent = "⬇ Download All";
       }, 2500);
     }, 800);
+  });
+
+  /* ── Refresh: reload DM tab and recapture audio ── */
+
+  refreshBtn.addEventListener("click", async () => {
+    if (refreshBtn.disabled) return;
+    refreshBtn.disabled = true;
+    refreshBtn.classList.add("spinning");
+
+    // Stop any playing audio
+    stopCurrent();
+
+    // Clear blob cache
+    Object.keys(blobCache).forEach((k) => delete blobCache[k]);
+
+    // Reset state
+    audios = [];
+    lastCount = -1;
+
+    // Tell background to clear captured audio for this tab
+    if (activeTabId) {
+      await send({ action: "resetChat", tabId: activeTabId });
+    }
+
+    // Show loading state
+    statusEl.textContent = "Refreshing — reloading DM page…";
+    listEl.innerHTML =
+      '<div class="empty">' +
+      '<div class="icon">🔄</div>' +
+      "Reloading Instagram DM…<br>Voice messages will appear shortly." +
+      "</div>";
+    footerEl.style.display = "none";
+    countEl.textContent = "0";
+
+    // Reload the Instagram tab
+    if (activeTabId) {
+      chrome.tabs.reload(activeTabId);
+    }
+
+    // Wait for the page to reload and audio to be recaptured
+    await new Promise((r) => setTimeout(r, 5000));
+
+    // Fetch new audio
+    await load();
+
+    refreshBtn.disabled = false;
+    refreshBtn.classList.remove("spinning");
   });
 
   /* ── Fetch and display ── */
