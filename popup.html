@@ -1,0 +1,224 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        width: 360px;
+        min-height: 200px;
+        font-family: -apple-system, system-ui, "Segoe UI", sans-serif;
+        background: #1a1a2e;
+        color: #e0e0e0;
+      }
+
+      /* ── Header ── */
+      .header {
+        background: linear-gradient(135deg, #0095f6, #833ab4);
+        padding: 14px 16px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .header .logo { font-size: 22px; }
+      .header h1 { font-size: 15px; font-weight: 700; color: #fff; }
+      .header .count {
+        margin-left: auto;
+        background: rgba(255,255,255,0.25);
+        color: #fff;
+        font-size: 12px;
+        font-weight: 700;
+        padding: 2px 9px;
+        border-radius: 12px;
+      }
+
+      /* ── Status bar ── */
+      .status-bar {
+        padding: 8px 16px;
+        font-size: 11px;
+        color: #888;
+        background: #16213e;
+        border-bottom: 1px solid #0f3460;
+      }
+
+      /* ── Audio list ── */
+      .list {
+        max-height: 380px;
+        overflow-y: auto;
+        padding: 6px 0;
+      }
+      .list::-webkit-scrollbar { width: 4px; }
+      .list::-webkit-scrollbar-thumb { background: #0f3460; border-radius: 2px; }
+
+      .empty {
+        text-align: center;
+        padding: 40px 20px;
+        color: #555;
+        font-size: 13px;
+        line-height: 1.6;
+      }
+      .empty .icon { font-size: 36px; margin-bottom: 10px; }
+
+      /* ── Audio row ── */
+      .row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 16px;
+        transition: background 0.15s;
+      }
+      .row:hover { background: #16213e; }
+
+      .row .num {
+        font-size: 11px;
+        color: #555;
+        min-width: 18px;
+        text-align: center;
+      }
+
+      .row .wave {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+      }
+      .row .wave .title {
+        font-size: 12px;
+        font-weight: 600;
+        color: #ccc;
+      }
+      .row .wave .time {
+        font-size: 10px;
+        color: #666;
+      }
+
+      /* ── Progress bar ── */
+      .progress-wrap {
+        width: 100%;
+        height: 3px;
+        background: #0f3460;
+        border-radius: 2px;
+        margin-top: 3px;
+        cursor: pointer;
+        display: none;
+      }
+      .progress-wrap.active { display: block; }
+      .progress-bar {
+        height: 100%;
+        background: #0095f6;
+        border-radius: 2px;
+        width: 0%;
+        transition: width 0.2s;
+      }
+
+      /* ── Buttons ── */
+      .btn {
+        border: none;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 14px;
+        transition: transform 0.1s, background 0.15s;
+        flex-shrink: 0;
+      }
+      .btn:active { transform: scale(0.9); }
+
+      .btn-play {
+        background: #0095f6;
+        color: #fff;
+      }
+      .btn-play:hover { background: #007acc; }
+      .btn-play.playing { background: #e74c3c; }
+      .btn-play.playing:hover { background: #c0392b; }
+
+      .btn-dl {
+        background: #2ecc71;
+        color: #fff;
+      }
+      .btn-dl:hover { background: #27ae60; }
+      .btn-dl.done { background: #555; }
+
+      /* ── Download All ── */
+      .footer {
+        padding: 10px 16px;
+        border-top: 1px solid #0f3460;
+      }
+      .btn-all {
+        width: 100%;
+        padding: 9px;
+        border: none;
+        border-radius: 8px;
+        background: linear-gradient(135deg, #0095f6, #833ab4);
+        color: #fff;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: opacity 0.15s;
+      }
+      .btn-all:hover { opacity: 0.9; }
+      .btn-all:disabled { opacity: 0.4; cursor: default; }
+
+      /* ── Support Footer ── */
+      .support {
+        padding: 10px 16px 12px;
+        border-top: 1px solid #0f3460;
+        background: #16213e;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .support a {
+        text-decoration: none;
+        font-size: 11px;
+        font-weight: 600;
+        padding: 5px 10px;
+        border-radius: 6px;
+        transition: opacity 0.15s;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .support a:hover { opacity: 0.85; }
+      .coffee-btn {
+        background: #FFDD00;
+        color: #000;
+      }
+      .rate-btn {
+        background: #0095f6;
+        color: #fff;
+      }
+      .github-btn {
+        background: #333;
+        color: #fff;
+      }
+      .version {
+        margin-left: auto;
+        font-size: 10px;
+        color: #555;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <span class="logo">🎙</span>
+      <h1>InstaAudio</h1>
+      <span class="count" id="count">0</span>
+    </div>
+    <div class="status-bar" id="status">Checking for voice messages…</div>
+    <div class="list" id="list"></div>
+    <div class="footer" id="footer" style="display:none">
+      <button class="btn-all" id="dlAll">⬇ Download All</button>
+    </div>
+    <div class="support">
+      <a href="https://buymeacoffee.com/amalkrishnap" target="_blank" class="coffee-btn">☕ Buy Me a Coffee</a>
+      <a href="https://github.com/C00LPIXER/InstaAudio" target="_blank" class="github-btn">⭐ GitHub</a>
+      <span class="version">v3.0.0</span>
+    </div>
+    <script src="popup.js"></script>
+  </body>
+</html>

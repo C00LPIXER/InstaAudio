@@ -1,0 +1,118 @@
+====================================================
+  CHROME WEB STORE LISTING — InstaAudio Downloader
+====================================================
+
+Use this text when filling out the Chrome Web Store Developer Dashboard.
+
+────────────────────────────────────────────────────
+EXTENSION NAME:
+────────────────────────────────────────────────────
+InstaAudio — Instagram Voice Message Downloader
+
+
+────────────────────────────────────────────────────
+SHORT DESCRIPTION (132 chars max):
+────────────────────────────────────────────────────
+Download & play Instagram DM voice messages instantly. Auto-captures audio clips — listen or save with one click!
+
+
+────────────────────────────────────────────────────
+DETAILED DESCRIPTION:
+────────────────────────────────────────────────────
+🎙 InstaAudio — The easiest way to download voice messages from Instagram DMs
+
+Ever wanted to save a voice message from an Instagram conversation? InstaAudio makes it effortless.
+
+━━━ HOW IT WORKS ━━━
+
+1️⃣ Open any Instagram DM conversation with voice messages
+2️⃣ Click the InstaAudio icon in your browser toolbar  
+3️⃣ All voice messages appear in a beautiful list
+4️⃣ Hit ▶ to play or ⬇ to download — it's that simple!
+
+━━━ KEY FEATURES ━━━
+
+✅ Auto-Capture — Voice messages are detected automatically when you open a chat
+▶️ In-Popup Playback — Listen to any voice message right in the popup, with progress bar & seek
+⬇️ One-Click Download — Save individual clips or download all at once
+🔄 Smart Chat Detection — Automatically refreshes when you switch between conversations  
+📊 Badge Counter — See how many voice messages are available at a glance
+🎨 Beautiful Dark UI — Clean, modern interface that feels native
+⚡ Lightning Fast — No lag, no delays, works instantly
+
+━━━ 100% PRIVATE & SECURE ━━━
+
+🔒 Zero data collection — nothing leaves your browser
+🔒 No account access — we never touch your Instagram login
+🔒 No analytics — no tracking, no telemetry, nothing
+🔒 No external servers — everything runs locally on your device
+🔒 Open source — inspect the code yourself
+
+━━━ PERFECT FOR ━━━
+
+• Saving important voice messages from friends & family  
+• Backing up business conversations
+• Keeping memorable audio messages
+• Content creators who need to archive DM audio
+
+━━━ SUPPORT ━━━
+
+Love InstaAudio? Consider buying us a coffee! ☕
+Found a bug? Report it on our GitHub page.
+
+Note: This extension is not affiliated with Instagram or Meta Platforms, Inc.
+
+
+────────────────────────────────────────────────────
+CATEGORY:
+────────────────────────────────────────────────────
+Productivity
+
+
+────────────────────────────────────────────────────
+LANGUAGE:
+────────────────────────────────────────────────────
+English
+
+
+────────────────────────────────────────────────────
+SCREENSHOTS NEEDED (1280x800 or 640x400):
+────────────────────────────────────────────────────
+1. Popup showing list of captured voice messages with play/download buttons
+2. Popup while audio is playing (showing progress bar)
+3. Badge counter visible in toolbar with Instagram DM open
+4. Download All feature in action
+5. Empty state — "Open an Instagram DM chat" message
+
+
+────────────────────────────────────────────────────
+PROMOTIONAL TILE (440x280):
+────────────────────────────────────────────────────
+Design: Gradient background (#0095f6 → #833ab4), 
+microphone icon, text "InstaAudio", 
+tagline "Download Instagram Voice Messages"
+
+
+────────────────────────────────────────────────────
+SINGLE PURPOSE DESCRIPTION (for Chrome review):
+────────────────────────────────────────────────────
+This extension allows users to download and play voice messages 
+from their own Instagram Direct Message conversations.
+
+
+────────────────────────────────────────────────────
+JUSTIFICATION FOR PERMISSIONS:
+────────────────────────────────────────────────────
+• webRequest: Required to detect audio file URLs in Instagram's 
+  network requests so we can identify voice message files.
+
+• downloads: Required to save voice message audio files to 
+  the user's computer when they click the download button.
+
+• activeTab + tabs: Required to associate captured audio URLs 
+  with the correct browser tab and determine if the user is 
+  on an Instagram DM page.
+
+• Host permissions (fbcdn.net, cdninstagram.com, fbsbx.com, 
+  facebook.com): Required to fetch audio data from Instagram's 
+  CDN servers for in-popup playback.
