@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
-    "name": "InstaAudio — Instagram Voice Message Downloader",
+    "name": "InstaAudio Downloader",
     "version": "3.0.0",
-    "description": "Download & play Instagram DM voice messages instantly. Auto-captures audio clips — listen or save with one click!",
+    "description": "Download & play Instagram DM voice messages instantly.",
     "icons": {
         "16": "icons/icon-16.png",
         "48": "icons/icon-48.png",
@@ -21,7 +21,8 @@
         "*://*.facebook.com/*"
     ],
     "background": {
-        "service_worker": "background.js"
+        "service_worker": "background.js",
+        "scripts": ["background.js"]
     },
     "action": {
         "default_popup": "popup.html",
@@ -40,5 +41,10 @@
             ],
             "run_at": "document_idle"
         }
-    ]
+    ],
+    "applications": {
+        "gecko": {
+            "id": "instaaudio@example.com"
+        }
+    }
 }
