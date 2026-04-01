@@ -34,6 +34,42 @@ function createSVG(size) {
   return svg;
 }
 
+function drawIcon(canvas) {
+  const s = canvas.width;
+  const ctx = canvas.getContext("2d");
+
+  // Background: rounded square with gradient
+  const r = s * 0.22;
+  const grad = ctx.createLinearGradient(0, 0, s, s);
+  grad.addColorStop(0, "#0095f6");
+  grad.addColorStop(1, "#833ab4");
+
+  ctx.beginPath();
+  ctx.moveTo(r, 0);
+  ctx.lineTo(s - r, 0);
+  ctx.quadraticCurveTo(s, 0, s, r);
+  ctx.lineTo(s, s - r);
+  ctx.quadraticCurveTo(s, s, s - r, s);
+  ctx.lineTo(r, s);
+  ctx.quadraticCurveTo(0, s, 0, s - r);
+  ctx.lineTo(0, r);
+  ctx.quadraticCurveTo(0, 0, r, 0);
+  ctx.closePath();
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // Icon: white circle with camera glyph
+  ctx.beginPath();
+  ctx.arc(s / 2, s / 2, s * 0.3, 0, 2 * Math.PI);
+  ctx.fillStyle = "#fff";
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.arc(s / 2, s / 2, s * 0.15, 0, 2 * Math.PI);
+  ctx.fillStyle = grad;
+  ctx.fill();
+}
+
 [16, 48, 128].forEach(function (size) {
   const svg = createSVG(size);
   fs.writeFileSync("c:/Users/HP/Downloads/InstaAudio/icons/icon-" + size + ".svg", svg);
@@ -41,3 +77,5 @@ function createSVG(size) {
 });
 
 console.log("Done! SVG icons created.");
+
+["c128", "c48", "c16"].forEach(id => drawIcon(document.getElementById(id)));

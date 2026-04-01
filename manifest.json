@@ -21,8 +21,8 @@
         "*://*.facebook.com/*"
     ],
     "background": {
-        "service_worker": "background.js",
-        "scripts": ["background.js"]
+        "scripts": ["background.js"],
+        "page": "background.html"
     },
     "action": {
         "default_popup": "popup.html",
@@ -42,9 +42,13 @@
             "run_at": "document_idle"
         }
     ],
-    "applications": {
+    "browser_specific_settings": {
         "gecko": {
-            "id": "instaaudio@example.com"
+            "id": "instaaudio@example.com",
+            "data_collection_permissions": {
+                "telemetry": false,
+                "required": []
+            }
         }
     }
 }
