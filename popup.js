@@ -17,7 +17,7 @@
   const refreshBtn = document.getElementById("refreshBtn");
 
   let currentAudio = null;  // HTMLAudioElement currently playing
-  let currentBtn   = null;  // the ▶ button that is active
+  let currentBtn   = null;  // the play button that is active
   let currentProg  = null;  // { wrap, bar, durEl } for active row
   let audios       = [];
   let activeTabId  = null;
@@ -26,6 +26,19 @@
 
   // Cache: clipId → dataUrl (so we only fetch the blob once)
   const blobCache = {};
+
+  /* ── SVG icons (no emojis) ── */
+
+  const IC = {
+    play:     '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>',
+    pause:    '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>',
+    loading:  '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4V1L8 5l4 4V6a6 6 0 0 1 6 6 6 6 0 0 1-.34 2h2.07A8 8 0 0 0 12 4zm-6 8a6 6 0 0 0 .34 2H4.27A8 8 0 0 0 12 20v3l4-4-4-4v3a6 6 0 0 1-6-6z"/></svg>',
+    download: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>',
+    check:    '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>',
+    mute:     '<svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor" opacity="0.4"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 11h-1.7A5.3 5.3 0 0 1 12 16.3 5.3 5.3 0 0 1 6.7 11H5a7 7 0 0 0 6 6.93V21h2v-3.07A7 7 0 0 0 19 11z"/><line x1="4" y1="2" x2="20" y2="22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+    refresh:  '<svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor" opacity="0.4"><path d="M17.65 6.35A7.96 7.96 0 0 0 12 4c-4.42 0-8 3.58-8 8s3.58 8 8 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>',
+    chat:     '<svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor" opacity="0.4"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg>',
+  };
 
   /* ── helpers ── */
 
@@ -60,7 +73,7 @@
       currentAudio = null;
     }
     if (currentBtn) {
-      currentBtn.textContent = "▶";
+      currentBtn.innerHTML = IC.play;
       currentBtn.classList.remove("playing");
       currentBtn = null;
     }
@@ -87,7 +100,7 @@
     if (audios.length === 0) {
       listEl.innerHTML =
         '<div class="empty">' +
-        '<div class="icon">🔇</div>' +
+        '<div class="icon">' + IC.mute + '</div>' +
         "No voice messages captured yet.<br>" +
         "Open an Instagram DM chat with<br>voice messages and wait a moment." +
         "</div>";
@@ -154,7 +167,7 @@
       // Play button
       const playBtn = document.createElement("button");
       playBtn.className = "btn btn-play";
-      playBtn.textContent = "▶";
+      playBtn.innerHTML = IC.play;
       playBtn.title = "Play";
 
       playBtn.addEventListener("click", async () => {
@@ -167,13 +180,13 @@
 
         stopCurrent();
 
-        playBtn.textContent = "⏳";
+        playBtn.innerHTML = IC.loading;
         playBtn.disabled = true;
 
         // Fetch blob through background to avoid CORS
         const dataUrl = await getBlob(clip);
         if (!dataUrl) {
-          playBtn.textContent = "▶";
+          playBtn.innerHTML = IC.play;
           playBtn.disabled = false;
           titleRow.textContent = "⚠ Could not load audio";
           setTimeout(() => (titleRow.textContent = "Voice Message " + (i + 1)), 2000);
@@ -186,7 +199,7 @@
         currentProg = { wrap: progressWrap, bar: progressBar, durEl: currentTimeEl };
         isPlaying = true;
 
-        playBtn.textContent = "⏸";
+        playBtn.innerHTML = IC.pause;
         playBtn.disabled = false;
         playBtn.classList.add("playing");
         progressWrap.classList.add("active");
@@ -234,16 +247,16 @@
       // Download button
       const dlBtn = document.createElement("button");
       dlBtn.className = "btn btn-dl";
-      dlBtn.textContent = "⬇";
+      dlBtn.innerHTML = IC.download;
       dlBtn.title = "Download";
 
       dlBtn.addEventListener("click", () => {
         const name = "voice_" + (i + 1) + "_" + clip.id + ".mp4";
         send({ action: "download", url: clip.url, name });
-        dlBtn.textContent = "✓";
+        dlBtn.innerHTML = IC.check;
         dlBtn.classList.add("done");
         setTimeout(() => {
-          dlBtn.textContent = "⬇";
+          dlBtn.innerHTML = IC.download;
           dlBtn.classList.remove("done");
         }, 2000);
       });
@@ -260,16 +273,16 @@
 
   dlAllBtn.addEventListener("click", () => {
     dlAllBtn.disabled = true;
-    dlAllBtn.textContent = "Downloading…";
+    dlAllBtn.innerHTML = IC.loading + " Downloading…";
     audios.forEach((clip, i) => {
       const name = "voice_" + (i + 1) + "_" + clip.id + ".mp4";
       send({ action: "download", url: clip.url, name });
     });
     setTimeout(() => {
-      dlAllBtn.textContent = "✓ All Downloaded";
+      dlAllBtn.innerHTML = IC.check + " All Downloaded";
       setTimeout(() => {
         dlAllBtn.disabled = false;
-        dlAllBtn.textContent = "⬇ Download All";
+        dlAllBtn.innerHTML = IC.download + " Download All";
       }, 2500);
     }, 800);
   });
@@ -300,7 +313,7 @@
     statusEl.textContent = "Refreshing — reloading DM page…";
     listEl.innerHTML =
       '<div class="empty">' +
-      '<div class="icon">🔄</div>' +
+      '<div class="icon">' + IC.refresh + '</div>' +
       "Reloading Instagram DM…<br>Voice messages will appear shortly." +
       "</div>";
     footerEl.style.display = "none";
@@ -336,7 +349,7 @@
       statusEl.textContent = "Open an Instagram DM chat first.";
       listEl.innerHTML =
         '<div class="empty">' +
-        '<div class="icon">💬</div>' +
+        '<div class="icon">' + IC.chat + '</div>' +
         "Navigate to Instagram Direct Messages<br>to capture voice messages." +
         "</div>";
       return;
