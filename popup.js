@@ -27,18 +27,82 @@
   // Cache: clipId → dataUrl (so we only fetch the blob once)
   const blobCache = {};
 
-  /* ── SVG icons (no emojis) ── */
+  /* ── SVG icon factory (DOM API – no innerHTML) ── */
 
-  const IC = {
-    play:     '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>',
-    pause:    '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>',
-    loading:  '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4V1L8 5l4 4V6a6 6 0 0 1 6 6 6 6 0 0 1-.34 2h2.07A8 8 0 0 0 12 4zm-6 8a6 6 0 0 0 .34 2H4.27A8 8 0 0 0 12 20v3l4-4-4-4v3a6 6 0 0 1-6-6z"/></svg>',
-    download: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>',
-    check:    '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>',
-    mute:     '<svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor" opacity="0.4"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 11h-1.7A5.3 5.3 0 0 1 12 16.3 5.3 5.3 0 0 1 6.7 11H5a7 7 0 0 0 6 6.93V21h2v-3.07A7 7 0 0 0 19 11z"/><line x1="4" y1="2" x2="20" y2="22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
-    refresh:  '<svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor" opacity="0.4"><path d="M17.65 6.35A7.96 7.96 0 0 0 12 4c-4.42 0-8 3.58-8 8s3.58 8 8 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>',
-    chat:     '<svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor" opacity="0.4"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg>',
+  const SVG_NS = "http://www.w3.org/2000/svg";
+
+  const SVG_DEFS = {
+    play:     { size: 14, paths: ["M8 5v14l11-7z"] },
+    pause:    { size: 14, paths: ["M6 19h4V5H6v14zm8-14v14h4V5h-4z"] },
+    loading:  { size: 14, paths: ["M12 4V1L8 5l4 4V6a6 6 0 0 1 6 6 6 6 0 0 1-.34 2h2.07A8 8 0 0 0 12 4zm-6 8a6 6 0 0 0 .34 2H4.27A8 8 0 0 0 12 20v3l4-4-4-4v3a6 6 0 0 1-6-6z"] },
+    download: { size: 14, paths: ["M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"] },
+    check:    { size: 14, paths: ["M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"] },
+    mute: {
+      size: 40, opacity: "0.4",
+      paths: [
+        "M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z",
+        "M19 11h-1.7A5.3 5.3 0 0 1 12 16.3 5.3 5.3 0 0 1 6.7 11H5a7 7 0 0 0 6 6.93V21h2v-3.07A7 7 0 0 0 19 11z",
+      ],
+      line: { x1: "4", y1: "2", x2: "20", y2: "22" },
+    },
+    refresh: {
+      size: 40, opacity: "0.4",
+      paths: ["M17.65 6.35A7.96 7.96 0 0 0 12 4c-4.42 0-8 3.58-8 8s3.58 8 8 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"],
+    },
+    chat: {
+      size: 40, opacity: "0.4",
+      paths: ["M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"],
+    },
   };
+
+  function makeSVG(name) {
+    const def = SVG_DEFS[name];
+    const svg = document.createElementNS(SVG_NS, "svg");
+    svg.setAttribute("width",   String(def.size));
+    svg.setAttribute("height",  String(def.size));
+    svg.setAttribute("viewBox", "0 0 24 24");
+    svg.setAttribute("fill",    "currentColor");
+    if (def.opacity) svg.setAttribute("opacity", def.opacity);
+    def.paths.forEach((d) => {
+      const path = document.createElementNS(SVG_NS, "path");
+      path.setAttribute("d", d);
+      svg.appendChild(path);
+    });
+    if (def.line) {
+      const line = document.createElementNS(SVG_NS, "line");
+      line.setAttribute("x1", def.line.x1);
+      line.setAttribute("y1", def.line.y1);
+      line.setAttribute("x2", def.line.x2);
+      line.setAttribute("y2", def.line.y2);
+      line.setAttribute("stroke", "currentColor");
+      line.setAttribute("stroke-width", "2");
+      line.setAttribute("stroke-linecap", "round");
+      svg.appendChild(line);
+    }
+    return svg;
+  }
+
+  // Set an element's content to an SVG icon plus optional label text
+  function setIcon(el, name, text) {
+    const nodes = [makeSVG(name)];
+    if (text) nodes.push(document.createTextNode("\u00a0" + text));
+    el.replaceChildren(...nodes);
+  }
+
+  // Build an empty-state block using DOM APIs
+  function makeEmpty(iconName, ...lines) {
+    const wrap = document.createElement("div");
+    wrap.className = "empty";
+    const iconDiv = document.createElement("div");
+    iconDiv.className = "icon";
+    iconDiv.appendChild(makeSVG(iconName));
+    wrap.appendChild(iconDiv);
+    lines.forEach((txt, i) => {
+      if (i > 0) wrap.appendChild(document.createElement("br"));
+      wrap.appendChild(document.createTextNode(txt));
+    });
+    return wrap;
+  }
 
   /* ── helpers ── */
 
@@ -73,7 +137,7 @@
       currentAudio = null;
     }
     if (currentBtn) {
-      currentBtn.innerHTML = IC.play;
+      setIcon(currentBtn, "play");
       currentBtn.classList.remove("playing");
       currentBtn = null;
     }
@@ -94,16 +158,16 @@
       return;
     }
 
-    listEl.innerHTML = "";
+    listEl.replaceChildren();
     countEl.textContent = audios.length;
 
     if (audios.length === 0) {
-      listEl.innerHTML =
-        '<div class="empty">' +
-        '<div class="icon">' + IC.mute + '</div>' +
-        "No voice messages captured yet.<br>" +
-        "Open an Instagram DM chat with<br>voice messages and wait a moment." +
-        "</div>";
+      listEl.appendChild(makeEmpty(
+        "mute",
+        "No voice messages captured yet.",
+        "Open an Instagram DM chat with",
+        "voice messages and wait a moment."
+      ));
       footerEl.style.display = "none";
       statusEl.textContent = "Waiting for voice messages…";
       return;
@@ -167,7 +231,7 @@
       // Play button
       const playBtn = document.createElement("button");
       playBtn.className = "btn btn-play";
-      playBtn.innerHTML = IC.play;
+      setIcon(playBtn, "play");
       playBtn.title = "Play";
 
       playBtn.addEventListener("click", async () => {
@@ -180,15 +244,15 @@
 
         stopCurrent();
 
-        playBtn.innerHTML = IC.loading;
+        setIcon(playBtn, "loading");
         playBtn.disabled = true;
 
         // Fetch blob through background to avoid CORS
         const dataUrl = await getBlob(clip);
         if (!dataUrl) {
-          playBtn.innerHTML = IC.play;
+          setIcon(playBtn, "play");
           playBtn.disabled = false;
-          titleRow.textContent = "⚠ Could not load audio";
+          titleRow.textContent = "Could not load audio";
           setTimeout(() => (titleRow.textContent = "Voice Message " + (i + 1)), 2000);
           return;
         }
@@ -199,7 +263,7 @@
         currentProg = { wrap: progressWrap, bar: progressBar, durEl: currentTimeEl };
         isPlaying = true;
 
-        playBtn.innerHTML = IC.pause;
+        setIcon(playBtn, "pause");
         playBtn.disabled = false;
         playBtn.classList.add("playing");
         progressWrap.classList.add("active");
@@ -225,7 +289,7 @@
         audio.addEventListener("error", () => {
           stopCurrent();
           currentTimeEl.style.display = "none";
-          titleRow.textContent = "⚠ Playback error";
+          titleRow.textContent = "Playback error";
           setTimeout(() => (titleRow.textContent = "Voice Message " + (i + 1)), 2000);
         });
 
@@ -247,16 +311,16 @@
       // Download button
       const dlBtn = document.createElement("button");
       dlBtn.className = "btn btn-dl";
-      dlBtn.innerHTML = IC.download;
+      setIcon(dlBtn, "download");
       dlBtn.title = "Download";
 
       dlBtn.addEventListener("click", () => {
         const name = "voice_" + (i + 1) + "_" + clip.id + ".mp4";
         send({ action: "download", url: clip.url, name });
-        dlBtn.innerHTML = IC.check;
+        setIcon(dlBtn, "check");
         dlBtn.classList.add("done");
         setTimeout(() => {
-          dlBtn.innerHTML = IC.download;
+          setIcon(dlBtn, "download");
           dlBtn.classList.remove("done");
         }, 2000);
       });
@@ -273,16 +337,16 @@
 
   dlAllBtn.addEventListener("click", () => {
     dlAllBtn.disabled = true;
-    dlAllBtn.innerHTML = IC.loading + " Downloading…";
+    setIcon(dlAllBtn, "loading", "Downloading…");
     audios.forEach((clip, i) => {
       const name = "voice_" + (i + 1) + "_" + clip.id + ".mp4";
       send({ action: "download", url: clip.url, name });
     });
     setTimeout(() => {
-      dlAllBtn.innerHTML = IC.check + " All Downloaded";
+      setIcon(dlAllBtn, "check", "All Downloaded");
       setTimeout(() => {
         dlAllBtn.disabled = false;
-        dlAllBtn.innerHTML = IC.download + " Download All";
+        setIcon(dlAllBtn, "download", "Download All");
       }, 2500);
     }, 800);
   });
@@ -311,11 +375,11 @@
 
     // Show loading state
     statusEl.textContent = "Refreshing — reloading DM page…";
-    listEl.innerHTML =
-      '<div class="empty">' +
-      '<div class="icon">' + IC.refresh + '</div>' +
-      "Reloading Instagram DM…<br>Voice messages will appear shortly." +
-      "</div>";
+    listEl.replaceChildren(makeEmpty(
+      "refresh",
+      "Reloading Instagram DM…",
+      "Voice messages will appear shortly."
+    ));
     footerEl.style.display = "none";
     countEl.textContent = "0";
 
@@ -347,11 +411,11 @@
 
     if (!tab.url || !tab.url.includes("instagram.com/direct")) {
       statusEl.textContent = "Open an Instagram DM chat first.";
-      listEl.innerHTML =
-        '<div class="empty">' +
-        '<div class="icon">' + IC.chat + '</div>' +
-        "Navigate to Instagram Direct Messages<br>to capture voice messages." +
-        "</div>";
+      listEl.replaceChildren(makeEmpty(
+        "chat",
+        "Navigate to Instagram Direct Messages",
+        "to capture voice messages."
+      ));
       return;
     }
 
