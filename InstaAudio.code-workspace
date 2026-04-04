@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../InstaAudio-page"
+		}
+	],
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "InstaAudio"
+	}
+}
